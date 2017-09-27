@@ -24,4 +24,4 @@ deployment:
   prod: 
     branch: /.*/
     commands: 
-      - docker push $CONTAINER_NAME > /dev/null
+      - docker push ${CONTAINER_NAME} > /dev/null
