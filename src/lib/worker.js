@@ -1,3 +1,4 @@
+var datadog = require('./datadog');
 var mongo = require('./mongo');
 var k8s = require('./k8s');
 var config = require('./config');
@@ -83,7 +84,9 @@ var workloop = function workloop() {
       }
 
       inReplicaSet(db, pods, status, function(err) {
-        finish(err, db);
+        datadog.createUserOnce(db, process.env.DATADOG_PASSWORD, function(err){
+          finish(err, db);
+        })
       });
     });
   });
