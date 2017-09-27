@@ -100,8 +100,6 @@ var initReplSet = function(db, hostIpAndPort, done) {
 };
 
 var replSetReconfig = function(db, rsConfig, force, done) {
-  console.log('replSetReconfig', rsConfig);
-
   rsConfig.version++;
 
   db.admin().command({ replSetReconfig: rsConfig, force: force }, {}, function (err) {
