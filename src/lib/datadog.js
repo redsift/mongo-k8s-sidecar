@@ -3,7 +3,6 @@ var mongo = require('./mongo');
 var createUserOnce = function createUserOnce(db, password, done) {
     var calledOnce = false
     return  function createUser(db, password, done) {
-        console.log('datadog.createUserOnce',calledOnce);
         if (calledOnce) {
             return done();
         }
