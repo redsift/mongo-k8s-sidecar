@@ -84,9 +84,7 @@ var workloop = function workloop() {
       }
 
       inReplicaSet(db, pods, status, function(err) {
-        datadog.createUserOnce(db, process.env.DATADOG_PASSWORD, function(err){
-          finish(err, db);
-        })
+        finish(err, db);
       });
     });
   });
@@ -133,17 +131,28 @@ var inReplicaSet = function(db, pods, status, done) {
 };
 
 var primaryWork = function(db, pods, members, shouldForce, done) {
+  var primaryDone = function(err) {
+    if (!err) {
+      datadog.createUserOnce(db, process.env.DATADOG_PASSWORD, function(err) {
+        done(err);
+      });
+      return;
+    }
+
+    done(err);
+  };
+  
   //Loop over all the pods we have and see if any of them aren't in the current rs members array
   //If they aren't in there, add them
   var addrToAdd = addrToAddLoop(pods, members);
   var addrToRemove = addrToRemoveLoop(members);
 
   if (addrToAdd.length || addrToRemove.length) {
-    mongo.addNewReplSetMembers(db, addrToAdd, addrToRemove, shouldForce, done);
+    mongo.addNewReplSetMembers(db, addrToAdd, addrToRemove, shouldForce, primaryDone);
     return;
   }
 
-  done();
+  primaryDone();
 };
 
 var notInReplicaSet = function(db, pods, done) {
