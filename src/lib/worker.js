@@ -92,7 +92,7 @@ var workloop = function workloop() {
 
 var finish = function(err, db) {
   if (err) {
-    console.error('Error in workloop', err);
+    console.error('Error in workloop', JSON.stringify(err));
   }
 
   if (db && db.close) {
