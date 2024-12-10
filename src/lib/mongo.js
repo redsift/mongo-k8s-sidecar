@@ -128,19 +128,45 @@ var addNewReplSetMembers = function(db, addrToAdd, addrToRemove, shouldForce, do
 var addNewMembers = function(rsConfig, addrsToAdd) {
   if (!addrsToAdd || !addrsToAdd.length) return;
 
-  //Follows what is basically in mongo's rs.add function
-  var max = 0;
+  var memberIds = [];
+  var newMemberId = 0;
 
-  for (var j in rsConfig.members) {
-    if (rsConfig.members[j]._id > max) {
-      max = rsConfig.members[j]._id;
-    }
+  // Build a list of existing rs member IDs
+  for (var i in rsConfig.members) {
+    memberIds.push(rsConfig.members[i]._id);
   }
 
   for (var i in addrsToAdd) {
+    var addrToAdd = addrsToAdd[i];
+
+    // Search for the next available member ID (max 255)
+    for (var i = newMemberId; i <= 255; i++) {
+      if (!memberIds.includes(i)) {
+        newMemberId = i;
+        memberIds.push(newMemberId);
+        break;
+      }
+    }
+
+    // Somehow we can get a race condition where the member config has been updated since we created the list of
+    // addresses to add (addrsToAdd) ... so do another loop to make sure we're not adding duplicates
+    var exists = false;
+    for (var j in rsConfig.members) {
+      var member = rsConfig.members[j];
+      if (member.host === addrToAdd) {
+        console.log("Host [%s] already exists in the Replicaset. Not adding...", addrToAdd);
+        exists = true;
+        break;
+      }
+    }
+
+    if (exists) {
+      continue;
+    }
+
     var cfg = {
-      _id: ++max,
-      host: addrsToAdd[i]
+      _id: newMemberId,
+      host: addrToAdd
     };
 
     rsConfig.members.push(cfg);
