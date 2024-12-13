@@ -1,4 +1,3 @@
-var datadog = require('./datadog');
 var mongo = require('./mongo');
 var k8s = require('./k8s');
 var config = require('./config');
@@ -130,18 +129,7 @@ var inReplicaSet = function(db, pods, status, done) {
   done();
 };
 
-var primaryWork = function(db, pods, members, shouldForce, done) {
-  var primaryDone = function(err) {
-    if (!err) {
-      datadog.createUserOnce(db, process.env.DATADOG_PASSWORD, function(err) {
-        done(err);
-      });
-      return;
-    }
-
-    done(err);
-  };
-  
+var primaryWork = function(db, pods, members, shouldForce, done) { 
   //Loop over all the pods we have and see if any of them aren't in the current rs members array
   //If they aren't in there, add them
   var addrToAdd = addrToAddLoop(pods, members);
@@ -152,7 +140,7 @@ var primaryWork = function(db, pods, members, shouldForce, done) {
     return;
   }
 
-  primaryDone();
+  done();
 };
 
 var notInReplicaSet = function(db, pods, done) {
