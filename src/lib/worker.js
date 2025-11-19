@@ -136,7 +136,7 @@ var primaryWork = function(db, pods, members, shouldForce, done) {
   var addrToRemove = addrToRemoveLoop(members);
 
   if (addrToAdd.length || addrToRemove.length) {
-    mongo.addNewReplSetMembers(db, addrToAdd, addrToRemove, shouldForce, primaryDone);
+    mongo.addNewReplSetMembers(db, addrToAdd, addrToRemove, shouldForce, done);
     return;
   }
 
